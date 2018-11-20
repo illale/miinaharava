@@ -21,7 +21,7 @@ def tayta_kopio():
     """
     for i, rivi in enumerate(tila["kentta_kopio"]):
         for j, elementti in enumerate(rivi):
-            tila["kentta_kopio"][i][j] = 0
+            tila["kentta_kopio"][i][j] = " "
 def miinoita(miinakentta, vapaat_ruudut, miinojen_lkm):
     """
     Asettaa kentällä N kpl miinoja satunnaisiin paikkoihin.
@@ -94,9 +94,19 @@ def hiiri_kasittelija(x, y, painike, muokkausnappaimet):
             elementti = tila["kentta"][alkio_y][alkio_x]
             if elementti == "x":
                 tila["kentta_kopio"][alkio_y][alkio_x] = elementti
-                haravasto.piirra_tekstia("Hävisit", 200, 200, (0, 0, 0))
+                """haravasto.piirra_tekstia("Hävisit", 200, 200, (0, 0, 0))"""
             else:
                 tila["kentta_kopio"][alkio_y][alkio_x] = elementti
+def tulvataytto(x, y):
+    """
+    Merkitsee planeetalla olevat tuntemattomat alueet turvalliseksi siten, että
+    täyttö aloitetaan annetusta x, y -pisteestä.
+    """
+    koordinaatit = [(x, y)]
+    alkio_x, alkio_y = koordinaatit.pop(-1)
+    while koordinaatit:
+        tila["kentta"][alkio_y][alkio_x] = "0"
+        tarkista_ruudut(kentta, koordinaatit, alkio_x, alkio_y)
 def piirra_kentta():
     """
     Käsittelijäfunktio, joka piirtää kaksiulotteisena listana kuvatun miinakentän
