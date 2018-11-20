@@ -17,7 +17,7 @@ def laske_vapaat_ruudut(kentta):
     return vapaat_ruudut
 def tayta_kopio():
     """
-    Täyttää kopion luvulla 0
+    Täyttää kopion " " merkillä.
     """
     for i, rivi in enumerate(tila["kentta_kopio"]):
         for j, elementti in enumerate(rivi):
@@ -34,9 +34,9 @@ def miinoita(miinakentta, vapaat_ruudut, miinojen_lkm):
             del vapaat_ruudut[miinoitettava_ruutu]
         except IndexError:
             pass
-def lisaa_x_listaan(x, rivi, miina_lista):
+def lisaa_alkio_listaan(x, rivi, miina_lista):
     """
-    Lisää koordinaattien vieressä olevat miinat listaan
+    Lisää koordinaattien vieressä olevat miinat listaan.
     """
     if 0 < x < tila["kentan_leveys"]:
         for j in range(-1, 2):
@@ -79,9 +79,9 @@ def sijoita_ruutu_kenttaan(kentta):
                     kentta[i][j] = 0
                 elif miinat != 0:
                     kentta[i][j] = miinat
-def tarkista_ruutu(x, y):
+def hanki_ruudun_indeksi(x, y):
     """
-    Palauttaa oikeat indeksit listaa varten koordinaattien perustteella
+    Palauttaa oikeat indeksit listaa varten koordinaattien perustteella.
     """
     for i in range(tila["kentan_korkeus"] + 1):
         if i * 40 < y < (i + 1) * 40:
@@ -99,14 +99,12 @@ def hiiri_kasittelija(x, y, painike, muokkausnappaimet):
                 tila["kentta_kopio"][alkio_y][alkio_x] = elementti
 def tulvataytto(x, y):
     """
-    Merkitsee planeetalla olevat tuntemattomat alueet turvalliseksi siten, että
-    täyttö aloitetaan annetusta x, y -pisteestä.
+    Aukaisee vierekkäiset tyhjät ruudut, kunnes saavutetaan miinaraja.
     """
     koordinaatit = [(x, y)]
     alkio_x, alkio_y = koordinaatit.pop(-1)
-    while koordinaatit:
+    while tila["kentta"][alkio_y][alkio_y] == " ":
         tila["kentta"][alkio_y][alkio_x] = "0"
-        tarkista_ruudut(kentta, koordinaatit, alkio_x, alkio_y)
 def piirra_kentta():
     """
     Käsittelijäfunktio, joka piirtää kaksiulotteisena listana kuvatun miinakentän
