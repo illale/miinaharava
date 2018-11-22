@@ -7,41 +7,55 @@ tila = {
     "kentta_kopio": None,
     "lista": []
 }
-def lisaa_viereiset_ruudut_listaan(x, i):
-    for j in range(-1, 2):
-        if tila["lista"].count((x + j, i)) == 0:
-            tila["lista"].append((x + j, i))
-        else:
-            pass
-def tarkista_viereiset_ruudut(x, y):
-    for i, rivi in enumerate(tila["kentta"]):
-        if y == tila["kentan_korkeus"]:
-            if i > tila["kentan_korkeus"] - 2:
-                lisaa_viereiset_ruudut_listaan(x, i)
-        else:
-            if (y - 1) <= i <= (y + 1):
-                lisaa_viereiset_ruudut_listaan(x, i)
+def tarkista_listan_x(x, i, lista, rivi, leveys):
+    if 0 < x < leveys:
+        for j in range(-1, 2):
+            if rivi[x + j] == " ":
+                lista.append((x + j, i))
+    elif x == 0:
+        for j in range(0, 2):
+            if rivi[x + j] == " ":
+                lista.append((x + j, i))
+    elif x == leveys:
+        for j in range(-1, 1):
+            if rivi[x + j] == " ":
+                lista.append((x + j, i))
+def tarkista_ruudut(kentta, lista, x, y):
+    p_korkeus = len(kentta) - 1
+    p_leveys = len(kentta[0]) - 1
+    for i, rivi in enumerate(kentta):
+        if y == 0:
+            while i < 2:
+                tarkista_listan_x(x, i, lista, rivi, p_leveys)
+                break
+        elif 0 < y < p_korkeus:
+            while (y - 1) <= i <= (y + 1):
+                tarkista_listan_x(x, i, lista, rivi, p_leveys)
+                break
+        elif y == p_korkeus:
+            while i > p_korkeus - 2:
+                tarkista_listan_x(x, i, lista, rivi, p_leveys)
+                break
 def tulvataytto(x, y):
     """
-    Aukaisee vierekkäiset tyhjät ruudut, kunnes saavutetaan miinaraja.
+    Merkitsee planeetalla olevat tuntemattomat alueet turvalliseksi siten, että
+    täyttö aloitetaan annetusta x, y -pisteestä.
     """
-    if tila["kentta"][y][x] == "0":
-        tila["lista"] = [(x, y)]
-        while tila["lista"] != []:
-            dx, dy = tila["lista"].pop(-1)
-            print(tila["lista"])
-            try:
-                elementti = tila["kentta"][dy][dx]
-            except IndexError:
+    if tila["kentta"][y][x] == "x":
+        pass
+    else:
+        koordinaatit = [(x, y)]
+        while koordinaatit:
+            print(koordinaatit)
+            alkio_x, alkio_y = koordinaatit.pop(-1)
+            if tila["kentta"][alkio_y][alkio_x] == "0":
+                tila["kentta_kopio"][alkio_y][alkio_x] = tila["kentta"][alkio_y][alkio_x]
+                tarkista_ruudut(tila["kentta_kopio"], koordinaatit, alkio_x, alkio_y)
+            elif tila["kentta"][alkio_y][alkio_x] == "x":
                 pass
-            else:
-                if elementti == "0":
-                    tila["kentta_kopio"][dy][dx] == "0"
-                    tarkista_viereiset_ruudut(dy, dx)
-                elif elementti == "x":
-                    pass
-                else:
-                    tila["kentta_kopio"][dy][dx] = elementti
+            elif tila["kentta"][alkio_y][alkio_x] != "0":
+                tila["kentta_kopio"][alkio_y][alkio_x] == tila["kentta"][alkio_y][alkio_x]
+
 def laske_vapaat_ruudut():
     """
     Laskee kentässa olevien vapaiden ruutujen määrän.
