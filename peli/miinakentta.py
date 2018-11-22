@@ -54,7 +54,7 @@ def tulvataytto(x, y):
             elif tila["kentta"][alkio_y][alkio_x] == "x":
                 pass
             elif tila["kentta"][alkio_y][alkio_x] != "0":
-                tila["kentta_kopio"][alkio_y][alkio_x] == tila["kentta"][alkio_y][alkio_x]
+                tila["kentta_kopio"][alkio_y][alkio_x] = tila["kentta"][alkio_y][alkio_x]
 
 def laske_vapaat_ruudut():
     """
