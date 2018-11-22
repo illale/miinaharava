@@ -8,24 +8,19 @@ tila = {
     "lista": []
 }
 def lisaa_viereiset_ruudut_listaan(x, i):
-    if 0 < x < tila["kentan_leveys"]:
-        for j in range(-1, 2):
+    for j in range(-1, 2):
+        if tila["lista"].count((x + j, i)) == 0:
             tila["lista"].append((x + j, i))
-    elif x == 0:
-        for j in range(0, 2):
-            tila["lista"].append((x + j, i))
-    elif x == tila["kentan_leveys"]:
-        for j in range(-1, 1):
-            tila["lista"].append((x + j, i))
-def tarkista_viereiset_ruudut(x, y):
-        if y == tila["kentan_korkeus"]:
-            for i, rivi in enumerate(tila["kentta"]):
-                if i > tila["kentan_korkeus"] - 2:
-                    lisaa_viereiset_ruudut_listaan(x, i)
         else:
-            for i, rivi in enumerate(tila["kentta"]):
-                if (y - 1) <= i <= (y + 1):
-                    lisaa_viereiset_ruudut_listaan(x, i)
+            pass
+def tarkista_viereiset_ruudut(x, y):
+    for i, rivi in enumerate(tila["kentta"]):
+        if y == tila["kentan_korkeus"]:
+            if i > tila["kentan_korkeus"] - 2:
+                lisaa_viereiset_ruudut_listaan(x, i)
+        else:
+            if (y - 1) <= i <= (y + 1):
+                lisaa_viereiset_ruudut_listaan(x, i)
 def tulvataytto(x, y):
     """
     Aukaisee vierekkäiset tyhjät ruudut, kunnes saavutetaan miinaraja.
@@ -34,13 +29,19 @@ def tulvataytto(x, y):
         tila["lista"] = [(x, y)]
         while tila["lista"] != []:
             dx, dy = tila["lista"].pop(-1)
-            if tila["kentta"][dy][dx] == "0":
-                tila["kentta_kopio"][dy][dx] == "0"
-                tarkista_viereiset_ruudut(dy, dx)
-            elif tila["kentta"][dy][dx] == "x":
-                    pass
+            print(tila["lista"])
+            try:
+                elementti = tila["kentta"][dy][dx]
+            except IndexError:
+                pass
             else:
-                tila["kentta_kopio"][dy][dx] = tila["kentta"][dy][dx]
+                if elementti == "0":
+                    tila["kentta_kopio"][dy][dx] == "0"
+                    tarkista_viereiset_ruudut(dy, dx)
+                elif elementti == "x":
+                    pass
+                else:
+                    tila["kentta_kopio"][dy][dx] = elementti
 def laske_vapaat_ruudut():
     """
     Laskee kentässa olevien vapaiden ruutujen määrän.
