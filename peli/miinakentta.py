@@ -4,14 +4,49 @@ tila = {
     "kentta": None,
     "kentan_leveys": 0,
     "kentan_korkeus": 0,
-    "kentta_kopio": None
+    "kentta_kopio": None,
+    "lista": []
 }
-def laske_vapaat_ruudut(kentta):
+def lisaa_viereiset_ruudut_listaan(x, i):
+    if 0 < x < tila["kentan_leveys"]:
+        for j in range(-1, 2):
+            tila["lista"].append((x + j, i))
+    elif x == 0:
+        for j in range(0, 2):
+            tila["lista"].append((x + j, i))
+    elif x == tila["kentan_leveys"]:
+        for j in range(-1, 1):
+            tila["lista"].append((x + j, i))
+def tarkista_viereiset_ruudut(x, y):
+        if y == tila["kentan_korkeus"]:
+            for i, rivi in enumerate(tila["kentta"]):
+                if i > tila["kentan_korkeus"] - 2:
+                    lisaa_viereiset_ruudut_listaan(x, i)
+        else:
+            for i, rivi in enumerate(tila["kentta"]):
+                if (y - 1) <= i <= (y + 1):
+                    lisaa_viereiset_ruudut_listaan(x, i)
+def tulvataytto(x, y):
+    """
+    Aukaisee vierekkäiset tyhjät ruudut, kunnes saavutetaan miinaraja.
+    """
+    if tila["kentta"][y][x] == "0":
+        tila["lista"] = [(x, y)]
+        while tila["lista"] != []:
+            dx, dy = tila["lista"].pop(-1)
+            if tila["kentta"][dy][dx] == "0":
+                tila["kentta_kopio"][dy][dx] == "0"
+                tarkista_viereiset_ruudut(dy, dx)
+            elif tila["kentta"][dy][dx] == "x":
+                    pass
+            else:
+                tila["kentta_kopio"][dy][dx] = tila["kentta"][dy][dx]
+def laske_vapaat_ruudut():
     """
     Laskee kentässa olevien vapaiden ruutujen määrän.
     """
     vapaat_ruudut = []
-    for i, x_rivi in enumerate(kentta):
+    for i, x_rivi in enumerate(tila["kentta"]):
         for j, alkio in enumerate(x_rivi):
                 vapaat_ruudut.append((j, i))
     return vapaat_ruudut
@@ -21,7 +56,7 @@ def tayta_kopio():
     """
     for i, rivi in enumerate(tila["kentta_kopio"]):
         for j, elementti in enumerate(rivi):
-            tila["kentta_kopio"][i][j] = " "
+            elementti = " "
 def miinoita(miinakentta, vapaat_ruudut, miinojen_lkm):
     """
     Asettaa kentällä N kpl miinoja satunnaisiin paikkoihin.
@@ -55,30 +90,30 @@ def laske_vierekkaiset_miinat(x, y, miinakentta):
     for i, kentan_rivi in enumerate(miinakentta):
         if y == 0:
             if i < 2:
-                lisaa_x_listaan(x, kentan_rivi, viereiset_ruudut)
+                lisaa_alkio_listaan(x, kentan_rivi, viereiset_ruudut)
         elif 0 < y < tila["kentan_korkeus"]:
             if (y - 1) <= i <= (y + 1):
-                lisaa_x_listaan(x, kentan_rivi, viereiset_ruudut)
+                lisaa_alkio_listaan(x, kentan_rivi, viereiset_ruudut)
         elif y == tila["kentan_korkeus"]:
             if i > tila["kentan_korkeus"] - 2:
-                lisaa_x_listaan(x, kentan_rivi, viereiset_ruudut)
+                lisaa_alkio_listaan(x, kentan_rivi, viereiset_ruudut)
     miinojen_maara = viereiset_ruudut.count("x")
     return miinojen_maara
-def sijoita_ruutu_kenttaan(kentta):
+def sijoita_ruutu_kenttaan():
     """
     Määrittää minkalainen ruutu kentan kohdassa pitää olla, ja sijoittaa
     sen siihen.
     """
-    for i, rivi in enumerate(kentta):
+    for i, rivi in enumerate(tila["kentta"]):
         for j, alkio in enumerate(rivi):
-            if kentta[i][j] == "x":
+            if tila["kentta"][i][j] == "x":
                 pass
-            elif kentta[i][j] == " ":
-                miinat = laske_vierekkaiset_miinat(j, i, kentta)
+            elif tila["kentta"][i][j] == " ":
+                miinat = laske_vierekkaiset_miinat(j, i, tila["kentta"])
                 if miinat == 0:
-                    kentta[i][j] = 0
+                    tila["kentta"][i][j] = "0"
                 elif miinat != 0:
-                    kentta[i][j] = miinat
+                    tila["kentta"][i][j] = str(miinat)
 def hanki_ruudun_indeksi(x, y):
     """
     Palauttaa oikeat indeksit listaa varten koordinaattien perustteella.
@@ -87,24 +122,20 @@ def hanki_ruudun_indeksi(x, y):
         if i * 40 < y < (i + 1) * 40:
             for j in range(tila["kentan_leveys"] + 1):
                 if j * 40 < x < (j + 1) * 40:
-                    return (j, i)
+                    palautettava_i = len(tila["kentta"]) - (i + 1)
+                    return (j, palautettava_i)
 def hiiri_kasittelija(x, y, painike, muokkausnappaimet):
     if painike == haravasto.HIIRI_VASEN:
-            alkio_x, alkio_y = tarkista_ruutu(x, y)
+        try:
+            alkio_x, alkio_y = hanki_ruudun_indeksi(x, y)
+        except TypeError:
+            pass
+        else:
+            print(alkio_x, alkio_y)
             elementti = tila["kentta"][alkio_y][alkio_x]
-            if elementti == "x":
-                tila["kentta_kopio"][alkio_y][alkio_x] = elementti
-                """haravasto.piirra_tekstia("Hävisit", 200, 200, (0, 0, 0))"""
-            else:
-                tila["kentta_kopio"][alkio_y][alkio_x] = elementti
-def tulvataytto(x, y):
-    """
-    Aukaisee vierekkäiset tyhjät ruudut, kunnes saavutetaan miinaraja.
-    """
-    koordinaatit = [(x, y)]
-    alkio_x, alkio_y = koordinaatit.pop(-1)
-    while tila["kentta"][alkio_y][alkio_y] == " ":
-        tila["kentta"][alkio_y][alkio_x] = "0"
+            tila["kentta_kopio"][alkio_y][alkio_x] = elementti
+            tulvataytto(alkio_x, alkio_y)
+
 def piirra_kentta():
     """
     Käsittelijäfunktio, joka piirtää kaksiulotteisena listana kuvatun miinakentän
@@ -114,21 +145,20 @@ def piirra_kentta():
     haravasto.tyhjaa_ikkuna()
     haravasto.piirra_tausta()
     haravasto.aloita_ruutujen_piirto()
-    for i, lista in enumerate(tila["kentta"]):
-        for j, alkio in enumerate(lista):
-            haravasto.lisaa_piirrettava_ruutu(alkio, j * 40, i * 40)
     for i, lista in enumerate(tila["kentta_kopio"]):
         for j, alkio in enumerate(lista):
-            haravasto.lisaa_piirrettava_ruutu(alkio, j * 40, i * 40)
+            y_koordinaatti = (len(tila["kentta_kopio"]) - (i + 1)) * 40
+            haravasto.lisaa_piirrettava_ruutu(alkio, j * 40, y_koordinaatti)
     haravasto.piirra_ruudut()
 def main():
     haravasto.lataa_kuvat("../spritet")
-    vapaat_ruudut = laske_vapaat_ruudut(tila["kentta"])
-    miinoita(tila["kentta"], vapaat_ruudut, 40)
-    sijoita_ruutu_kenttaan(tila["kentta"])
+    vapaat_ruudut = laske_vapaat_ruudut()
+    miinoita(tila["kentta"], vapaat_ruudut, 20)
+    sijoita_ruutu_kenttaan()
     haravasto.aseta_piirto_kasittelija(piirra_kentta)
     haravasto.aseta_hiiri_kasittelija(hiiri_kasittelija)
-    print(tila["kentta"])
+    for i, rivi in enumerate(tila["kentta"]):
+        print(tila["kentta"][i])
     haravasto.aloita()
 
 
