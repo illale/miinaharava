@@ -46,7 +46,6 @@ def tulvataytto(x, y):
     else:
         koordinaatit = [(x, y)]
         while koordinaatit:
-            print(koordinaatit)
             alkio_x, alkio_y = koordinaatit.pop(-1)
             if tila["kentta"][alkio_y][alkio_x] == "0":
                 tila["kentta_kopio"][alkio_y][alkio_x] = tila["kentta"][alkio_y][alkio_x]
@@ -54,7 +53,7 @@ def tulvataytto(x, y):
             elif tila["kentta"][alkio_y][alkio_x] == "x":
                 pass
             elif tila["kentta"][alkio_y][alkio_x] != "0":
-                tila["kentta_kopio"][alkio_y][alkio_x] == tila["kentta"][alkio_y][alkio_x]
+                tila["kentta_kopio"][alkio_y][alkio_x] = tila["kentta"][alkio_y][alkio_x]
 
 def laske_vapaat_ruudut():
     """
@@ -146,10 +145,19 @@ def hiiri_kasittelija(x, y, painike, muokkausnappaimet):
         except TypeError:
             pass
         else:
-            print(alkio_x, alkio_y)
             elementti = tila["kentta"][alkio_y][alkio_x]
-            tila["kentta_kopio"][alkio_y][alkio_x] = elementti
-            tulvataytto(alkio_x, alkio_y)
+            if elementti == "x":
+                haravasto.lopeta()
+            else:
+                tila["kentta_kopio"][alkio_y][alkio_x] = elementti
+                tulvataytto(alkio_x, alkio_y)
+    elif painike == haravasto.HIIRI_OIKEA:
+        try:
+            alkio_x, alkio_y = hanki_ruudun_indeksi(x, y)
+        except TypeError:
+            pass
+        else:
+            tila["kentta_kopio"][alkio_y][alkio_x] = "f"
 
 def piirra_kentta():
     """
