@@ -9,9 +9,16 @@ tila = {
     "häviö": False,
     "voitto": False,
     "aloitus": 0,
-    "lopetus": 0
+    "lopetus": 0,
+    "aika": 0
 }
-def laske_kentan_korkeus_leveys():
+def nollaa_tilat():
+    tila["aloitus"] = 0
+    tila["lopeuts"] = 0
+    tila["häviö"] = False
+    tila["voitto"] = False
+    tila["aika"] = 0
+def aseta_kentan_korkeus_leveys():
     tila["kentan_korkeus"] = len(tila["kentta"]) - 1
     tila["kentan_leveys"] = len(tila["kentta"][0]) - 1
 def tarkista_listan_x(x, i, lista, rivi, leveys):
@@ -61,7 +68,6 @@ def tulvataytto(x, y):
                 pass
             elif tila["kentta"][alkio_y][alkio_x] != "0":
                 tila["kentta_kopio"][alkio_y][alkio_x] = tila["kentta"][alkio_y][alkio_x]
-
 def laske_vapaat_ruudut():
     """
     Laskee kentässa olevien vapaiden ruutujen määrän.
@@ -80,7 +86,7 @@ def tayta_kopio():
             elementti = " "
 def miinoita(miinakentta, vapaat_ruudut, miinojen_lkm):
     """
-    Asettaa kentällä N kpl miinoja satunnaisiin paikkoihin.
+    Asettaa kentälle N kpl miinoja satunnaisiin paikkoihin.
     """
     for i in range(miinojen_lkm):
         miinoitettava_ruutu = random.randint(0, len(vapaat_ruudut))
@@ -136,10 +142,10 @@ def sijoita_ruutu_kenttaan():
                 elif miinat != 0:
                     tila["kentta"][i][j] = str(miinat)
 def laske_kulunut_aika():
-    return tila["lopetus"] - tila["aloitus"]
+    tila["aika"] = tila["lopetus"] - tila["aloitus"]
 def hanki_ruudun_indeksi(x, y):
     """
-    Palauttaa oikeat indeksit listaa varten koordinaattien perustteella.
+    Palauttaa oikeat indeksit listaa varten koordinaattien perusteella.
     """
     for i in range(tila["kentan_korkeus"] + 1):
         if i * 40 < y < (i + 1) * 40:
@@ -165,7 +171,7 @@ def laske_miinojen_maara_kopiossa():
         return True
 def laske_suljetut_ruudut():
     suljettujen_maara = 0
-    for rivi in tila["kentta"]:
+    for rivi in tila["kentta_kopio"]:
         suljettujen_maara += rivi.count(" ")
     return suljettujen_maara
 def tarkista_voitto():
@@ -189,7 +195,6 @@ def hiiri_kasittelija(x, y, painike, muokkausnappaimet):
             else:
                 elementti = tila["kentta"][alkio_y][alkio_x]
                 if elementti == "x":
-                    tila["kentta_kopio"][alkio_y][alkio_x] = elementti
                     paljasta_miinat()
                     tila["häviö"] = True
                 else:
@@ -202,9 +207,9 @@ def hiiri_kasittelija(x, y, painike, muokkausnappaimet):
             except TypeError:
                 pass
             else:
-                if tila ["kentta_kopio"][alkio_y][alkio_x] != "f":
+                if tila ["kentta_kopio"][alkio_y][alkio_x] == " ":
                     tila["kentta_kopio"][alkio_y][alkio_x] = "f"
-                else:
+                elif tila["kentta_kopio"][alkio_y][alkio_x] == "f":
                     tila["kentta_kopio"][alkio_y][alkio_x] = " "
                 tarkista_voitto()
 def piirra_kentta():
@@ -222,23 +227,30 @@ def piirra_kentta():
             haravasto.lisaa_piirrettava_ruutu(alkio, j * 40, y_koordinaatti)
     haravasto.piirra_ruudut()
     if tila["häviö"]:
+        haravasto.muuta_ikkunan_koko((tila["kentan_leveys"] + 1) * 40, (tila["kentan_korkeus"] + 2) * 40)
         haravasto.piirra_tekstia("Hävisit, poistu painamalla ESC", 10,
-                                 (tila["kentan_korkeus"] + 1) * 40 + 10, koko=20)
+                                 (tila["kentan_korkeus"] + 1) * 40 + 10, koko=20, vari=(255,0,255,100))
+        tila["lopetus"] = time.perf_counter()
+        laske_kulunut_aika()
     elif tila["voitto"]:
+        haravasto.muuta_ikkunan_koko((tila["kentan_leveys"] + 1) * 40, (tila["kentan_korkeus"] + 2) * 40)
         haravasto.piirra_tekstia("Voitit, poistu painamalla ESC", 10,
-                                 (tila["kentan_korkeus"] + 1) * 40 + 10, koko=20)
+                                 (tila["kentan_korkeus"] + 1) * 40 + 10, koko=20, vari=(255,0,255,100))
+        tila["lopetus"] = time.perf_counter()
+        laske_kulunut_aika()
 def main():
     haravasto.lataa_kuvat("../spritet")
     tila["kentta_kopio"] = copy.deepcopy(tila["kentta"])
     tayta_kopio()
     tila["kentan_korkeus"] = len(tila["kentta"]) - 1
     tila["kentan_leveys"] = len(tila["kentta"][0]) - 1
-    haravasto.luo_ikkuna((tila["kentan_leveys"] + 1) * 40, (tila["kentan_korkeus"] + 2) * 40)
+    haravasto.luo_ikkuna((tila["kentan_leveys"] + 1) * 40, (tila["kentan_korkeus"] + 1) * 40)
     vapaat_ruudut = laske_vapaat_ruudut()
     miinoita(tila["kentta"], vapaat_ruudut, tila["miinojen_lkm"])
     sijoita_ruutu_kenttaan()
     haravasto.aseta_piirto_kasittelija(piirra_kentta)
     haravasto.aseta_hiiri_kasittelija(hiiri_kasittelija)
+    nollaa_tilat()
     for rivi in tila["kentta"]:
         print(rivi)
     haravasto.aloita()
