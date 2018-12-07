@@ -9,18 +9,18 @@ def luo_kentta(korkeus, leveys):
             lista[i].append(" ")
     return lista
 def tallenna_tulokset(tiedosto, tulokset):
-    with open(tiedosto, "r+") as lahde:
-        try:
-            tallennus = json.load(lahde)
-        except json.JSONDecodeError:
-            json.dump(tulokset, lahde)
-        else:
-            tallennus.append(tulokset)
-            json.dump(tallennus, lahde)
+    with open(tiedosto, "a") as lahde:
+        lahde.write("Pelaaja: {}, Aika: {}, Miinojen määrä: {}, Kentan koko: {}x{} \n".format(tulokset["nimi"],
+                                                                                        tulokset["aika"],
+                                                                                        tulokset["miinojen_maara"],
+                                                                                        tulokset["leveys"],
+                                                                                        tulokset["korkeus"]
+        ))
 def lue_tulokset(tiedosto):
     with open(tiedosto) as lahde:
-        tallennus = json.load(lahde)
-        return tallennus
+        rivit = lahde.readlines()
+        for rivi in rivit:
+            print(rivi)
 def laske_kulunut_aika():
     return miinakentta.tila["lopetus"] - miinakentta.tila["aloitus"]
 def muotoile_aika():
@@ -66,7 +66,6 @@ if __name__ == "__main__":
                 else:
                     miinakentta.tila["kentta"] = luo_kentta(korkeus, leveys)
                     for k, rivi in enumerate(miinakentta.tila["kentta"]):
-                        print(rivi)
                         miinakentta.tila["miinojen_lkm"] = miinojen_lkm
                     main()
                     nimi = input("Anna pelaajan nimi: ")
@@ -82,13 +81,13 @@ if __name__ == "__main__":
                         pelaaja["tila"] = "Voitto"
                     else:
                         pelaaja["tila"] = "Tappio"
-                    tulokset.append(pelaaja)
-                    tallenna_tulokset("tulokset.json", tulokset)
+                    tallenna_tulokset("tulokset.txt", pelaaja)
                     break
         elif komento == "tulokset":
-            tallennetut_tiedot = lue_tulokset("tulokset.json")
-            muotoile_tulokset(tallennetut_tiedot)
-            print()
+            try:
+                tallennetut_tiedot = lue_tulokset("tulokset.txt")
+            except FileNotFoundError:
+                print("Tuloksia ei vielä ole.")
         elif komento == "lopeta":
             print("Hei hei!")
             break

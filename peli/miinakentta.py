@@ -183,7 +183,7 @@ def tarkista_voitto():
             if (kopion_elementti == "f" or kopion_elementti == " ") and kentan_elementti == "x" :
                 lista.append(1)
     maara = lista.count(1)
-    if maara == tila["miinojen_lkm"] and laske_suljetut_ruudut() == 0:
+    if maara == tila["miinojen_lkm"] and laske_suljetut_ruudut() == maara:
         tila["voitto"] = True
 def hiiri_kasittelija(x, y, painike, muokkausnappaimet):
     if laske_miinojen_maara_kopiossa():
