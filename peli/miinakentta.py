@@ -11,7 +11,8 @@ peli = {
     "aloitus": 0,
     "lopetus": 0,
     "aika": 0,
-    "liike": True
+    "liike": True,
+    "siirtojen_maara": 0
 }
 def nollaa_tilat():
     peli["aloitus"] = 0
@@ -193,6 +194,7 @@ def hiiri_kasittelija(x, y, painike, muokkausnappaimet):
                 pass
             else:
                 elementti = peli["kentta"][i][j]
+                peli["siirtojen_maara"] += 1
                 if elementti == "x":
                     paljasta_miinat()
                     peli["häviö"] = True
