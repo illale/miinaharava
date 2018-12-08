@@ -6,21 +6,20 @@ peli = {
     "korkeus": 0,
     "kopio": None,
     "miinojen_lkm": 0,
-    "häviö": False,
-    "voitto": False,
     "aloitus": 0,
     "lopetus": 0,
     "aika": 0,
     "liike": True,
-    "siirtojen_maara": 0
+    "siirtojen_maara": 0,
+    "tila": "Kesken",
+    "kello": 0
 }
 def nollaa_tilat():
     peli["aloitus"] = 0
     peli["lopeuts"] = 0
-    peli["häviö"] = False
-    peli["voitto"] = False
-    peli["aika"] = 0,
+    peli["aika"] = 0
     peli["liike"] = True
+    peli["tila"] = "Kesken"
 def aseta_kentan_korkeus_leveys():
     peli["korkeus"] = len(peli["kentta"])
     peli["leveys"] = len(peli["kentta"][0])
@@ -184,7 +183,10 @@ def tarkista_voitto():
     maara = lista.count(1)
     sul = laske_suljetut_ruudut()
     if maara == peli["miinojen_lkm"] and 0 <= sul <= maara:
-        peli["voitto"] = True
+        peli["tila"] = "Voitto"
+        peli["liike"] = False
+        peli["lopetus"] = time.perf_counter()
+        laske_kulunut_aika()
 def hiiri_kasittelija(x, y, painike, muokkausnappaimet):
     if peli["liike"]:
         if painike == haravasto.HIIRI_VASEN:
@@ -197,7 +199,10 @@ def hiiri_kasittelija(x, y, painike, muokkausnappaimet):
                 peli["siirtojen_maara"] += 1
                 if elementti == "x":
                     paljasta_miinat()
-                    peli["häviö"] = True
+                    peli["tila"] = "Häviö"
+                    peli["liike"] = False
+                    peli["lopetus"] = time.perf_counter()
+                    laske_kulunut_aika()
                 else:
                     peli["kopio"][i][j] = elementti
                     tulvataytto(j, i)
@@ -227,18 +232,14 @@ def piirra_kentta():
             y_koordinaatti = (len(peli["kopio"]) - (i + 1)) * 40
             haravasto.lisaa_piirrettava_ruutu(alkio, j * 40, y_koordinaatti)
     haravasto.piirra_ruudut()
-    if peli["häviö"]:
-        peli["liike"] = False
-        haravasto.piirra_tekstia("Hävisit, poistu painamalla ESC", 50,
-                                 (peli["korkeus"] // 2) * 40 + 5, koko=20, vari=(244,66,66,255))
-        peli["lopetus"] = time.perf_counter()
-        laske_kulunut_aika()
-    elif peli["voitto"]:
-        peli["liike"] = False
-        haravasto.piirra_tekstia("Voitit, poistu painamalla ESC", 50,
-                                 (peli["korkeus"] // 2) * 40, koko=20, vari=(244,66,66,255))
-        peli["lopetus"] = time.perf_counter()
-        laske_kulunut_aika()
+    haravasto.piirra_tekstia("Siirtojen maara: {}".format(peli["siirtojen_maara"]), 10,
+                             peli["korkeus"] * 40 + 20, koko=10, vari=(244,66,66,255))
+    haravasto.piirra_tekstia("Tilanne: {}".format(peli["tila"]), 10,
+                             peli["korkeus"] * 40, koko=10, vari=(244,66,66,255))
+    haravasto.piirra_tekstia("Miinojen määrä: {}".format(peli["miinojen_lkm"]), 200,
+                             peli["korkeus"] * 40, koko=10, vari=(244,66,66,255))
+    haravasto.piirra_tekstia("Paina ESC poistuaksesi", 200, peli["korkeus"] * 40 + 20,
+                             koko=10, vari=(244,66,66,255))
 def main():
     haravasto.lataa_kuvat("../spritet")
     peli["kopio"] = copy.deepcopy(peli["kentta"])

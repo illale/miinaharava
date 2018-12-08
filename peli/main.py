@@ -45,7 +45,7 @@ def main():
     mk.tayta_kopio()
     mk.aseta_kentan_korkeus_leveys()
     haravasto.luo_ikkuna((mk.peli["leveys"]) * 40,
-                         (mk.peli["korkeus"]) * 40)
+                         (mk.peli["korkeus"] + 1) * 40)
     mk.miinoita(mk.laske_vapaat_ruudut(),
                 mk.peli["miinojen_lkm"])
     mk.sijoita_ruutu_kenttaan()
@@ -72,7 +72,6 @@ if __name__ == "__main__":
                         mk.peli["miinojen_lkm"] = miinojen_lkm
                     main()
                     nimi = input("Anna pelaajan nimi: ")
-                    print(mk.peli["siirtojen_maara"])
                     aika = muotoile_aika()
                     pelaaja = {
                                 "nimi": nimi,
@@ -80,22 +79,16 @@ if __name__ == "__main__":
                                 "miinojen_maara": miinojen_lkm,
                                 "leveys": leveys,
                                 "korkeus": korkeus,
-                                "tila": None,
+                                "tila": mk.peli["tila"],
                                 "vuorot": mk.peli["siirtojen_maara"],
                                 "päivä": hanki_paivamaara()
                                 }
-                    if mk.peli["voitto"]:
-                        pelaaja["tila"] = "Voitto"
-                    elif mk.peli["häviö"]:
-                        pelaaja["tila"] = "Tappio"
-                    else:
-                        pelaaja["tila"] = "Keskeytys"
                     tallenna_tulokset("tulokset.txt", pelaaja)
                     break
         elif komento == "tulokset":
             try:
-                print("P = Pelaaja, A = Aika, M = Miinojen määrä")
-                print("KK = Kentän koko, Lt = Lopputulos, Vm = Vuorojen määrä")
+                print("P = Pelaaja, A = Aika, M = Miinojen määrä,")
+                print("Kk = Kentän koko, Lt = Lopputulos, Vm = Vuorojen määrä,")
                 print("Pvm = Päivämäärä")
                 tallennetut_tiedot = lue_tulokset("tulokset.txt")
             except FileNotFoundError:
