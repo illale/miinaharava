@@ -17,8 +17,7 @@ def tallenna_tulokset(tiedosto, tulokset):
                                                                                         tulokset["korkeus"],
                                                                                         tulokset["tila"],
                                                                                         tulokset["vuorot"],
-                                                                                        tulokset["päivä"]
-        ))
+                                                                                        tulokset["päivä"]))
 def lue_tulokset(tiedosto):
     with open(tiedosto) as lahde:
         rivit = lahde.readlines()

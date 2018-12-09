@@ -23,7 +23,7 @@ def nollaa_tilat():
 def aseta_kentan_korkeus_leveys():
     peli["korkeus"] = len(peli["kentta"])
     peli["leveys"] = len(peli["kentta"][0])
-def tarkista_listan_x(x, i, lista, rivi):
+def lisaa_viereiset_alkiot_listaan(x, i, lista, rivi):
     if 0 < x < peli["leveys"] - 1:
         for j in range(-1, 2):
             if rivi[x + j] == " ":
@@ -40,13 +40,13 @@ def tarkista_ruudut(lista, x, y):
     for i, rivi in enumerate(peli["kopio"]):
         if y == 0:
             if i < 2:
-                tarkista_listan_x(x, i, lista, rivi)
+                lisaa_viereiset_alkiot_listaan(x, i, lista, rivi)
         elif 0 < y < peli["korkeus"] - 1:
             if (y - 1) <= i <= (y + 1):
-                tarkista_listan_x(x, i, lista, rivi)
+                lisaa_viereiset_alkiot_listaan(x, i, lista, rivi)
         elif y == peli["korkeus"] - 1:
             if i > peli["korkeus"] - 3:
-                tarkista_listan_x(x, i, lista, rivi)
+                lisaa_viereiset_alkiot_listaan(x, i, lista, rivi)
 def tulvataytto(x, y):
     """
     Merkitsee planeetalla olevat tuntemattomat alueet turvalliseksi siten, että
@@ -67,7 +67,7 @@ def tulvataytto(x, y):
                 peli["kopio"][alkio_y][alkio_x] = peli["kentta"][alkio_y][alkio_x]
 def laske_vapaat_ruudut():
     """
-    Laskee kentässa olevien vapaiden ruutujen määrän.
+    Palauttaa listan kentän ruuduista.
     """
     vapaat_ruudut = []
     for i, x_rivi in enumerate(peli["kentta"]):
@@ -88,24 +88,24 @@ def miinoita(vapaat_ruudut, miinojen_lkm):
     for i in range(miinojen_lkm):
         miinoitettava_ruutu = random.randint(0, len(vapaat_ruudut))
         try:
-            x_index, y_index = vapaat_ruudut[miinoitettava_ruutu]
-            peli["kentta"][y_index][x_index] = "x"
+            j, i = vapaat_ruudut[miinoitettava_ruutu]
+            peli["kentta"][i][j] = "x"
             del vapaat_ruudut[miinoitettava_ruutu]
         except IndexError:
             pass
-def lisaa_alkio_listaan(x, rivi, miina_lista):
+def lisaa_ruudut_listaan(x, rivi, ruudut):
     """
-    Lisää koordinaattien vieressä olevat miinat listaan.
+    Lisää koordinaattien vieressä olevat ruudut listaan.
     """
     if 0 < x < peli["leveys"] - 1:
         for j in range(-1, 2):
-            miina_lista.append(rivi[x + j])
+            ruudut.append(rivi[x + j])
     elif x == 0:
         for j in range(0, 2):
-            miina_lista.append(rivi[x + j])
+            ruudut.append(rivi[x + j])
     elif x == peli["leveys"] - 1:
         for j in range(-1, 1):
-            miina_lista.append(rivi[x + j])
+            ruudut.append(rivi[x + j])
 def laske_vierekkaiset_miinat(x, y):
     """
     Laskee ruudun vieressä olevien miinojen määrä.
@@ -114,13 +114,13 @@ def laske_vierekkaiset_miinat(x, y):
     for i, kentan_rivi in enumerate(peli["kentta"]):
         if y == 0:
             if i < 2:
-                lisaa_alkio_listaan(x, kentan_rivi, viereiset_ruudut)
+                lisaa_ruudut_listaan(x, kentan_rivi, viereiset_ruudut)
         elif 0 < y < peli["korkeus"]:
             if (y - 1) <= i <= (y + 1):
-                lisaa_alkio_listaan(x, kentan_rivi, viereiset_ruudut)
+                lisaa_ruudut_listaan(x, kentan_rivi, viereiset_ruudut)
         elif y == peli["korkeus"]:
             if i > peli["korkeus"] - 2:
-                lisaa_alkio_listaan(x, kentan_rivi, viereiset_ruudut)
+                lisaa_ruudut_listaan(x, kentan_rivi, viereiset_ruudut)
     miinojen_maara = viereiset_ruudut.count("x")
     return miinojen_maara
 def sijoita_ruutu_kenttaan():
@@ -151,21 +151,13 @@ def hanki_ruudun_indeksi(x, y):
                     palautettava_i = peli["korkeus"] - (i + 1)
                     return (j, palautettava_i)
 def paljasta_miinat():
+    """
+    Paljastaa kentällä piilossa olevat miinat.
+    """
     for i, rivi in enumerate(peli["kentta"]):
         for j, alkio in enumerate(rivi):
             if peli["kentta"][i][j] == "x":
                 peli["kopio"][i][j] = peli["kentta"][i][j]
-def laske_miinojen_maara_kopiossa():
-    lista = []
-    for rivi in peli["kopio"]:
-        for alkio in rivi:
-            if alkio == "x":
-                lista.append(1)
-    maara = lista.count(1)
-    if maara == peli["miinojen_lkm"]:
-        return False
-    elif maara != peli["miinojen_lkm"]:
-        return True
 def laske_suljetut_ruudut():
     suljettujen_maara = 0
     for rivi in peli["kopio"]:
@@ -188,6 +180,10 @@ def tarkista_voitto():
         peli["lopetus"] = time.perf_counter()
         laske_kulunut_aika()
 def hiiri_kasittelija(x, y, painike, muokkausnappaimet):
+    """
+    Hiiren käsittelijäfunktio, jota kutsutaan, kun hiiren oikeaa tai
+    vasenta painiketta painetaan.
+    """
     if peli["liike"]:
         if painike == haravasto.HIIRI_VASEN:
             try:
@@ -232,14 +228,14 @@ def piirra_kentta():
             y_koordinaatti = (len(peli["kopio"]) - (i + 1)) * 40
             haravasto.lisaa_piirrettava_ruutu(alkio, j * 40, y_koordinaatti)
     haravasto.piirra_ruudut()
-    haravasto.piirra_tekstia("Siirtojen maara: {}".format(peli["siirtojen_maara"]), 10,
-                             peli["korkeus"] * 40 + 20, koko=10, vari=(244,66,66,255))
+    haravasto.piirra_tekstia("Siirtojen määrä: {}".format(peli["siirtojen_maara"]), 10,
+                             peli["korkeus"] * 40 + 20, koko=10, vari=(0,0,0,255))
     haravasto.piirra_tekstia("Tilanne: {}".format(peli["tila"]), 10,
-                             peli["korkeus"] * 40, koko=10, vari=(244,66,66,255))
+                             peli["korkeus"] * 40, koko=10, vari=(0,0,0,255))
     haravasto.piirra_tekstia("Miinojen määrä: {}".format(peli["miinojen_lkm"]), 200,
-                             peli["korkeus"] * 40, koko=10, vari=(244,66,66,255))
+                             peli["korkeus"] * 40, koko=10, vari=(0,0,0,255))
     haravasto.piirra_tekstia("Paina ESC poistuaksesi", 200, peli["korkeus"] * 40 + 20,
-                             koko=10, vari=(244,66,66,255))
+                             koko=10, vari=(0,0,0,255))
 def main():
     haravasto.lataa_kuvat("../spritet")
     peli["kopio"] = copy.deepcopy(peli["kentta"])
